@@ -18,6 +18,8 @@ factor of:
 
 **TODO**
 
+- [ ] Testing
+- [ ] Documentation and examples
 - [ ] Add more interaction potentials and approximation schemes
 
 ## Installation
