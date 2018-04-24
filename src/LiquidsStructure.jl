@@ -1,10 +1,11 @@
 __precompile__()
 
 
-module LiquidStructure
+module LiquidsStructure
 
 
 ### Implementation
+include("utils.jl")
 include("potentials.jl")
 include("schemes.jl")
 include("structure.jl")

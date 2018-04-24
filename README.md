@@ -1,9 +1,9 @@
 # LiquidsStructure.jl
 
-This is library intended to provided the structure factor of a variety of
-liquids with different interaction potentials and under different approximation
-schemes (e.g. Percus--Yevick closure for the Ornstein--Zernike relation for a
-hard-sphere liquid) in [Julia](http://julialang.org)
+This library intended to provide a mean to compute the structure factor of a
+variety of liquids with different interaction potentials and under different
+approximation schemes (e.g. Percus--Yevick closure for the Ornstein--Zernike
+relation for a hard-sphere liquid) in [Julia](http://julialang.org)
 
 ## Status
 
@@ -40,6 +40,7 @@ The structure factor can be calculated in two ways:
 
  - 1. By using the function `structure_factor(::InteractionPotential,
       ::ApproximationScheme, k)`, where `k` is a wavevector.
+
  - 2. By constructing a `StructureFactor(::InteractionPotential,
-      ::ApproximationScheme)` object, say `S`, and then using `S` a function
-      over the wavevector `k` (`S(k)`).
+      ::ApproximationScheme)` object `S`, and then using `S` a function over
+      the wavevector `k` (`S(k)`).
