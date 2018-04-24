@@ -52,7 +52,7 @@ function structure_factor(p::DipolarHardSphere, c::MSA, k)
     k  = k
     k² = k * k
     sink, cosk = sin(k), cos(k)
-    
+
     T⁻¹ = 1 / c.T′
     α₀, α₁, α₃, β₁, β₃ = c.α₀, c.α₁, c.α₃, c.β₁, c.β₃
     a₁, a₃, b₁, b₃ = c.a₁, c.a₃, c.b₁, c.b₃
@@ -60,15 +60,15 @@ function structure_factor(p::DipolarHardSphere, c::MSA, k)
     C₁₀ = a₃ - a₁ * k² +
           (-a₃ + (α₀ + 2α₁ + 4α₃ + 2 * (5β₁ + 7β₃ - T⁻¹)) * k² / 3) * k * sink +
           (-a₃ + ((a₁ + a₃ / 2) - (α₀ + α₁ + α₃ + 2 * (β₁ + β₃ - T⁻¹)) * k² / 3) * k²) * cosk
-    
+
     C₁₁ = b₃ - b₁ * k² +
           (-b₃ + (α₀ + 2α₁ + 4α₃ - (5β₁ + 7β₃ - T⁻¹)) * k² / 3) * k * sink +
           (-b₃ + ((b₁ + b₃ / 2) - (α₀ + α₁ + α₃ - (β₁ + β₃ - T⁻¹)) * k² / 3) * k²) * cosk
-    
+
     S₀₀ = structure_factor(HardSphere(), c.py, k)
     S₁₀ = 1 / (1 - 24c.η * C₁₀ / k²^3)
     S₁₁ = 1 / (1 - 24c.η * C₁₁ / k²^3)
-    
+
     return (S₀₀, S₁₀, S₁₁)
 end
 
@@ -77,7 +77,7 @@ function structure_factor(::HardDisk, c::RosenfeldFMT, k)
     J₀ = besselj0(k / 2)
     J₁ = besselj1(k / 2)
     J₁′ = besselj1(k)
-    
+
     smallk = k < 0.075
 
     α = smallk ? c.A * (0.25 - 0.015625k²) + c.B * (0.5 - 0.046875k²) + c.G *  (1 - 0.125k²) :

@@ -52,30 +52,30 @@ end
 function MSA(T′::T, η::T, tol = sqrt(eps(T))) where {T<:AbstractFloat}
     κ  = dhs_msa_parameter(T′, η, tol)
     py = PercusYevick(η)
-    
+
     ξ = κ * η
-    
+
     ξ₁² = (1 - 2ξ)^2
     ξ₁⁴ = ξ₁² * ξ₁²
     ξ₂⁴ = (1 +  ξ)^4
     ξ₃² = (1 + 4ξ)^2
-    
+
     r₁ = ξ₃² / ξ₁⁴
     r₂ = ξ₁² / ξ₂⁴
     r₃ = 8 * (1 + ξ)^2 / ξ₁⁴
     r₄ = (2 - ξ)^2 / ξ₂⁴
-    
+
     α₀ = 2κ * (-r₁ + r₂)
     α₁ = 3ξ * κ * ( r₃ + r₄)
     α₃ = -ξ * κ * (2r₁ + r₂)
     β₁ = 3ξ * κ / 8 * (2r₃ - r₄)
     β₃ = -ξ * κ / 4 * (4r₁ - r₂)
-    
+
     a₁ = 2 * (α₁ + 8β₁) / 3
     a₃ = 8 * (α₃ + 4β₃)
     b₁ = 2 * (α₁ - 4β₁) / 3
     b₃ = 8 * (α₃ - 2β₃)
-    
+
     return MSA{T}(η, T′, α₀, α₁, α₃, β₁, β₃, a₁, a₃, b₁, b₃, py)
 end
 
@@ -91,7 +91,7 @@ function RosenfeldFMT(η::T) where {T<:AbstractFloat}
     G = sqrt( Z′ / 2 )
     A = (1 + (2η - 1) * χ + 2η * G) / η
     B = ((1 - η) * χ - 1 - 3η * G) / η
-    
+
     return RosenfeldFMT{T}(η, G, A, B)
 end
 
