@@ -3,7 +3,7 @@ struct StructureFactor{U, C, T}
     c::C
 end
 
-StructureFactor(u::U, c::C) where {U<:ApproximationScheme, T, C<:ApproximationScheme{T}} =
+StructureFactor(u::U, c::C) where {U<:InteractionPotential, T, C<:ApproximationScheme{T}} =
     StructureFactor{U, C, T}(u, c)
 
 (S::StructureFactor{U, C, T})(k) where {U, C, T} = structure_factor(S.u, S.c, k)
