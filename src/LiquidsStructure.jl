@@ -15,7 +15,7 @@ include("structure.jl")
 export ApproximationScheme, DipolarHardSphere, HardDisk, HardSphere,
        InteractionPotential, MSA, PercusYevick, RosenfeldFMT, StructureFactor,
        VerletWeis,
-       structure_factor
+       dimension, structure_factor
 
 
 end # module
