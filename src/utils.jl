@@ -1,4 +1,12 @@
 """
+    dimension(::InteractionPotential)
+
+Returns the dimensionality of an interaction potential.
+"""
+dimension(::U) where {N, U <: InteractionPotential{N}} = N
+dimension(sk::StructureFactor) = dimension(sk.u)
+
+"""
     dhs_msa_parameter(T′, η::T, tol)
 
 Returns the solution `κ` to
