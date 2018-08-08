@@ -55,7 +55,7 @@ function MSA(T′::T, η::T, tol = sqrt(eps(T))) where {T<:AbstractFloat}
     κ  = dhs_msa_parameter(T′, η, tol)
     py = PercusYevick(η)
 
-    T⁻¹ = 1 / c.T′
+    T⁻¹ = 1 / T′
     ξ = κ * η
 
     ξ₁² = (1 - 2ξ)^2
