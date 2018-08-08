@@ -3,10 +3,14 @@ struct StructureFactor{U, C, T}
     c::C
 end
 
-StructureFactor(u::U, c::C) where {U<:InteractionPotential, T, C<:ApproximationScheme{T}} =
-    StructureFactor{U, C, T}(u, c)
+function StructureFactor(u::U, c::C) where
+         {U <: InteractionPotential, T, C <: ApproximationScheme{T}}
+    return StructureFactor{U, C, T}(u, c)
+end
 
-(S::StructureFactor{U, C, T})(k) where {U, C, T} = structure_factor(S.u, S.c, k)
+function (S::StructureFactor{U, C, T})(k) where {U, C, T}
+    return structure_factor(S.u, S.c, k)
+end
 
 """
     structure_factor(::HardSphere, ::PercusYevick, η, k)
@@ -51,25 +55,32 @@ approximation.
 function structure_factor(p::DipolarHardSphere, c::MSA, k)
     k  = k
     k² = k * k
+    k⁶ = k² * k² * k²
     sink, cosk = sin(k), cos(k)
 
-    T⁻¹ = 1 / c.T′
-    α₀, α₁, α₃, β₁, β₃ = c.α₀, c.α₁, c.α₃, c.β₁, c.β₃
+    smallk = k < 0.075
+
+    α₀, α₁, α₂, α₃ = c.α₀, c.α₁, c.α₂, c.α₃
+    β₀, β₁, β₂, β₃ = c.β₀, c.β₁, c.β₂, c.β₃
     a₁, a₃, b₁, b₃ = c.a₁, c.a₃, c.b₁, c.b₃
 
-    C₁₀ = a₃ - a₁ * k² +
-          (-a₃ + (α₀ + 2α₁ + 4α₃ + 2 * (5β₁ + 7β₃ - T⁻¹)) * k² / 3) * k * sink +
-          (-a₃ + ((a₁ + a₃ / 2) - (α₀ + α₁ + α₃ + 2 * (β₁ + β₃ - T⁻¹)) * k² / 3) * k²) * cosk
+    C₁₀ = smallk ? (α₀ + 2β₀ - (α₁ + 2β₁) * k²) :
+                   (  a₃ - a₁ * k² + (-a₃ + (α₃ + 2β₃) * k² / 3) * k * sink +
+                    (-a₃ + ((a₁ + a₃ / 2) - (α₂ + 2β₂) * k² / 3) * k²) * cosk
+                   ) / k⁶
+    C₁₁ = smallk ? (α₀ -  β₀ - (α₁ -  β₁) * k²) :
+                   (  b₃ - b₁ * k² + (-b₃ + (α₃ -  β₃) * k² / 3) * k * sink +
+                    (-b₃ + ((b₁ + b₃ / 2) - (α₂ -  β₂) * k² / 3) * k²) * cosk
+                   ) / k⁶
 
-    C₁₁ = b₃ - b₁ * k² +
-          (-b₃ + (α₀ + 2α₁ + 4α₃ - (5β₁ + 7β₃ - T⁻¹)) * k² / 3) * k * sink +
-          (-b₃ + ((b₁ + b₃ / 2) - (α₀ + α₁ + α₃ - (β₁ + β₃ - T⁻¹)) * k² / 3) * k²) * cosk
+    Ck₁₀ = 24c.η * C₁₀
+    Ck₁₁ = 24c.η * C₁₁
 
-    S₀₀ = structure_factor(HardSphere(), c.py, k)
-    S₁₀ = 1 / (1 - 24c.η * C₁₀ / k²^3)
-    S₁₁ = 1 / (1 - 24c.η * C₁₁ / k²^3)
+    Sk₀₀ = structure_factor(HardSphere(), c.py, k)
+    Sk₁₀ = 1 / (1 - Ck₁₀)
+    Sk₁₁ = 1 / (1 - Ck₁₁)
 
-    return (S₀₀, S₁₀, S₁₁)
+    return (Sk₀₀, Sk₁₀, Sk₁₁)
 end
 
 function structure_factor(::HardDisk, c::RosenfeldFMT, k)
@@ -80,10 +91,11 @@ function structure_factor(::HardDisk, c::RosenfeldFMT, k)
 
     smallk = k < 0.075
 
-    α = smallk ? c.A * (0.25 - 0.015625k²) + c.B * (0.5 - 0.046875k²) + c.G *  (1 - 0.125k²) :
-                 c.A * (2J₁ / k)^2  + (c.B * 2J₀ * J₁ / k) + (c.G * 2J₁′ / k)
+    C = smallk ? (c.A * (1 - k² / 16) / 4 + c.B * (1 - 3k² / 32) / 2 +
+                  c.G * (1 - k² / 8 )) :
+                 (c.A * (2J₁ / k)^2 + c.B * 2J₀ * J₁ / k + c.G * 2J₁′ / k)
 
-    Ck = -4c.η * α
+    Ck = -4c.η * C
 
     return Sk = 1 / (1 - Ck)
 end
