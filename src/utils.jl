@@ -23,7 +23,7 @@ The solution is found by Newton's method
 function dhs_msa_parameter(T′, η::T, tol) where {T <: AbstractFloat}
     y = 8η / T′
 
-    ξ = T(0)
+    ξ = √(eps(T))
     r = T(Inf)
 
     while abs(1 - r) > tol
