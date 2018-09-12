@@ -28,7 +28,7 @@ factor of:
 installed from a Julia session by running
 
 ```julia
-julia> Pkg.clone("https://gitlab.com/NE-SCGLE/LiquidsStructure.jl.git")
+julia> Pkg.clone("https://github.com/LANIMFE/LiquidsStructure.jl.git")
 ```
 
 ## Usage
