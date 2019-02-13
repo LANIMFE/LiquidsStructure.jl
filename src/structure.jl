@@ -76,7 +76,7 @@ function structure_factor(p::DipolarHardSphere, c::MSA, k)
     Ck₁₀ = 24c.η * C₁₀
     Ck₁₁ = 24c.η * C₁₁
 
-    Sk₀₀ = structure_factor(HardSphere(), c.py, k)
+    Sk₀₀ = structure_factor(HardSphere(), c.c, k)
     Sk₁₀ = 1 / (1 - Ck₁₀)
     Sk₁₁ = 1 / (1 - Ck₁₁)
 
