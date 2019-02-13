@@ -1,14 +1,15 @@
 ### Types
 abstract type ApproximationScheme{T} end
+abstract type IsotropicApproximationScheme{T} <: ApproximationScheme{T} end
 
-struct PercusYevick{T<:AbstractFloat} <: ApproximationScheme{T}
+struct PercusYevick{T<:AbstractFloat} <: IsotropicApproximationScheme{T}
     η::T
     α::T
     β::T
     δ::T
 end
 
-struct MSA{T<:AbstractFloat} <: ApproximationScheme{T}
+struct MSA{C, T<:AbstractFloat} <: ApproximationScheme{T}
     η::T
     α₀::T
     α₁::T
@@ -22,17 +23,17 @@ struct MSA{T<:AbstractFloat} <: ApproximationScheme{T}
     a₃::T
     b₁::T
     b₃::T
-    py::PercusYevick{T}
+    c::C
 end
 
-struct RosenfeldFMT{T<:AbstractFloat} <: ApproximationScheme{T}
+struct RosenfeldFMT{T<:AbstractFloat} <: IsotropicApproximationScheme{T}
     η::T
     G::T
     A::T
     B::T
 end
 
-struct VerletWeis{T<:AbstractFloat} <: ApproximationScheme{T}
+struct VerletWeis{T<:AbstractFloat} <: IsotropicApproximationScheme{T}
     py::PercusYevick{T}
     α::T
 end
@@ -51,12 +52,14 @@ function PercusYevick(η::T) where {T<:AbstractFloat}
     return PercusYevick{T}(η, α, β, δ)
 end
 
-function MSA(T′::T, η::T, tol = sqrt(eps(T))) where {T<:AbstractFloat}
-    κ  = dhs_msa_parameter(T′, η, tol)
-    py = PercusYevick(η)
+function MSA(::Type{C}, T′::T, η::T, tol = sqrt(eps(T))) where
+        {C<:IsotropicApproximationScheme, T<:AbstractFloat}
+
+    κ = dhs_msa_parameter(T′, η, tol)
+    c = C(η)
 
     T⁻¹ = 1 / T′
-    ξ = κ * η
+    ξ   = κ * η
 
     ξ₁² = (1 - 2ξ)^2
     ξ₁⁴ = ξ₁² * ξ₁²
@@ -89,7 +92,7 @@ function MSA(T′::T, η::T, tol = sqrt(eps(T))) where {T<:AbstractFloat}
     b₁ = 2 * (α₁′ - 4β₁′) / 3
     b₃ = 8 * (α₃′ - 2β₃′)
 
-    return MSA{T}(η, α₀, α₁, α₂, α₃, β₀, β₁, β₂, β₃, a₁, a₃, b₁, b₃, py)
+    return MSA{C, T}(η, α₀, α₁, α₂, α₃, β₀, β₁, β₂, β₃, a₁, a₃, b₁, b₃, c)
 end
 
 function RosenfeldFMT(η::T) where {T<:AbstractFloat}
