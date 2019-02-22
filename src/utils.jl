@@ -45,7 +45,7 @@ function dhs_msa_parameter(T′, η::T, tol) where {T <: AbstractFloat}
         ξ = ξ + (ξ₁₂ / 4) * (ξ₁⁶ - ξ₃² * ξ₂⁴ + y * ξ₁₂⁴) / (4ξ₃ * ξ₂⁶ + ξ₁⁶ * ξ₄)
 
         r = ξ / ξ₋
-        
+
         if (1 - r) ≤ tol
             if r > 1
                 ξ = ξ₋
@@ -56,3 +56,15 @@ function dhs_msa_parameter(T′, η::T, tol) where {T <: AbstractFloat}
 
     return ξ / η
 end
+
+density_param(a::ApproximationScheme) = a.η
+density_param(a::VerletWeis) = density_param(a.py)
+
+### Printing methods
+#Base.show(io::IO, f::StructureFactor) = print(io, f.u, ",", f.c)
+#function Base.show(io::IO, ::U) where {U <: InteractionPotential}
+#    print(io, nameof(U))
+#end
+#function Base.show(io::IO, c::C) where {C <: ApproximationScheme}
+#    print(io, nameof(C), "(", density_param(c), ")")
+#end
