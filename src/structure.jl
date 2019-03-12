@@ -1,27 +1,49 @@
-struct StructureFactor{U, C, T}
-    u::U
-    c::C
+struct StructureFactor{L, S}
+    liquid::L
+    scheme::S
 end
 
-function StructureFactor(u::U, c::C) where
-         {U <: InteractionPotential, T, C <: ApproximationScheme{T}}
-    return StructureFactor{U, C, T}(u, c)
+function StructureFactor(liquid::L, T::Type; kw...) where {L <: Liquid}
+    scheme = T(liquid, kw...)
+    return StructureFactor{L, typeof(scheme)}(liquid, scheme)
 end
 
-function (S::StructureFactor{U, C, T})(k) where {U, C, T}
-    return structure_factor(S.u, S.c, k)
+(S::StructureFactor)(k) = structure_factor(S.liquid, S.scheme, k)
+
+function structure_factor(liquid::HardDisks, scheme::RosenfeldFMT, k)
+    η = liquid.η
+
+    A, B, G = scheme.A, scheme.B, scheme.G
+
+    k² = k * k
+    J₀ = besselj0(k / 2)
+    J₁ = besselj1(k / 2)
+    J₁′ = besselj1(k)
+
+    smallk = k < 0.075
+
+    C = smallk ? (A * (1 -  k² / 16) / 4 + B * (1 - 3k² / 32) / 2 +
+                  G * (1 -  k² / 8 )) :
+                 (A * (2J₁ / k)^2 + B * 2J₀ * J₁ / k + G * 2J₁′ / k)
+
+    Ck = -4η * C
+
+    return Sk = 1 / (1 - Ck)
 end
 
 """
-    structure_factor(::HardSphere, ::PercusYevick, η, k)
+    structure_factor(liquid::HardSpheres, scheme::PercusYevick, k)
 
-Returns the static structure factor for hard-spheres
-using the Percus-Yevick approximation.
+Returns the static structure factor for a hard-spheres liquid using the
+Percus-Yevick approximation.
 
-`η` is the effective volume fraction\n
 `k` is the wavevector value
 """
-function structure_factor(::HardSphere, c::PercusYevick, k)
+function structure_factor(liquid::HardSpheres, scheme::PercusYevick, k)
+    η = liquid.η
+
+    α, β, δ = scheme.α, scheme.β, scheme.δ
+
     k² = k * k
     k³ = k² * k
     k⁴ = k² * k²
@@ -38,31 +60,43 @@ function structure_factor(::HardSphere, c::PercusYevick, k)
     C₃ = smallk ? (1 - k² / 8 ) / 6 :
                   ((4k³ - 24k) * sink - (k⁴ - 12k² + 24) * cosk + 24) / k⁶
 
-    Ck = 24c.η * ( c.α * C₀ + c.β * C₁ + c.δ * C₃)
+    Ck = 24η * (α * C₀ + β * C₁ + δ * C₃)
 
     return Sk = 1 / (1 - Ck)
 end
 
 """
-    structure_factor(p::DipolarHardSphere, c::MSA, k)
+    structure_factor(::HardSpheres, ::VerletWeis, k)
 
-Returns the the proyections of the static structure factor
-`(S₀₀, S₁₀, S₁₁)` for dipolar hard-spheres using the MSA
-approximation.
+Returns the static structure factor for hard-spheres liquid
+using the Percus-Yevick approximation with the Verlet-Weis
+correction.
 
 `k` is the wavevector value
 """
-function structure_factor(p::DipolarHardSphere, c::MSA, k)
-    k  = k
+structure_factor(liquid::HardSpheres, scheme::VerletWeis, k) =
+    structure_factor(scheme.coreliquid, scheme.subscheme, scheme.α * k)
+
+"""
+    structure_factor(liquid::DipolarHardSpheres, scheme::MSA, k)
+
+Returns the the proyections of the static structure factor `(S₀₀, S₁₀, S₁₁)`
+for a dipolar hard-spheres liquid using the MSA approximation.
+
+`k` is the wavevector value
+"""
+function structure_factor(liquid::DipolarHardSpheres, scheme::MSA, k)
+    η = liquid.η
+
+    α₀, α₁, α₂, α₃ = scheme.α₀, scheme.α₁, scheme.α₂, scheme.α₃
+    β₀, β₁, β₂, β₃ = scheme.β₀, scheme.β₁, scheme.β₂, scheme.β₃
+    a₁, a₃, b₁, b₃ = scheme.a₁, scheme.a₃, scheme.b₁, scheme.b₃
+
     k² = k * k
     k⁶ = k² * k² * k²
     sink, cosk = sin(k), cos(k)
 
     smallk = k < 0.075
-
-    α₀, α₁, α₂, α₃ = c.α₀, c.α₁, c.α₂, c.α₃
-    β₀, β₁, β₂, β₃ = c.β₀, c.β₁, c.β₂, c.β₃
-    a₁, a₃, b₁, b₃ = c.a₁, c.a₃, c.b₁, c.b₃
 
     C₁₀ = smallk ? (α₀ + 2β₀ - (α₁ + 2β₁) * k²) :
                    (  a₃ - a₁ * k² + (-a₃ + (α₃ + 2β₃) * k² / 3) * k * sink +
@@ -73,42 +107,12 @@ function structure_factor(p::DipolarHardSphere, c::MSA, k)
                     (-b₃ + ((b₁ + b₃ / 2) - (α₂ -  β₂) * k² / 3) * k²) * cosk
                    ) / k⁶
 
-    Ck₁₀ = 24c.η * C₁₀
-    Ck₁₁ = 24c.η * C₁₁
+    Ck₁₀ = 24η * C₁₀
+    Ck₁₁ = 24η * C₁₁
 
-    Sk₀₀ = structure_factor(HardSphere(), c.c, k)
+    Sk₀₀ = structure_factor(scheme.coreliquid, scheme.subscheme, k)
     Sk₁₀ = 1 / (1 - Ck₁₀)
     Sk₁₁ = 1 / (1 - Ck₁₁)
 
     return (Sk₀₀, Sk₁₀, Sk₁₁)
 end
-
-function structure_factor(::HardDisk, c::RosenfeldFMT, k)
-    k² = k * k
-    J₀ = besselj0(k / 2)
-    J₁ = besselj1(k / 2)
-    J₁′ = besselj1(k)
-
-    smallk = k < 0.075
-
-    C = smallk ? (c.A * (1 - k² / 16) / 4 + c.B * (1 - 3k² / 32) / 2 +
-                  c.G * (1 - k² / 8 )) :
-                 (c.A * (2J₁ / k)^2 + c.B * 2J₀ * J₁ / k + c.G * 2J₁′ / k)
-
-    Ck = -4c.η * C
-
-    return Sk = 1 / (1 - Ck)
-end
-
-"""
-    structure_factor(::HardSphere, ::VerletWeis, η, k)
-
-Returns the static structure factor for hard-spheres
-using the Percus-Yevick approximation with the Verlet-Weis
-correction.
-
-`η` is the effective volume fraction\n
-`k` is the wavevector value
-"""
-structure_factor(::HardSphere, c::VerletWeis, k) =
-    structure_factor(HardSphere(), c.py, c.α * k)

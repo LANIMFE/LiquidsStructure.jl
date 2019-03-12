@@ -1,10 +1,13 @@
 """
-    dimension(::InteractionPotential)
+    dimensionality(::Liquid)
 
-Returns the dimensionality of an interaction potential.
+Returns the dimensionality of a liquid system.
 """
-dimension(::U) where {N, U <: InteractionPotential{N}} = N
-dimension(sk::StructureFactor) = dimension(sk.u)
+dimensionality(::L) where {N, L <: Liquid{N}} = N
+dimensionality(sk::StructureFactor) = dimensionality(sk.u)
+
+matching_liquid(PercusYevick) = HardSpheres
+matching_liquid(VerletWeis) = HardSpheres
 
 """
     dhs_msa_parameter(T′, η::T, tol)
@@ -22,8 +25,8 @@ The solution is found by Newton's method
 
 [Wertheim1971] M. S. Wertheim, J. Chem. Phys. 55, 4291 (1971).
 """
-function dhs_msa_parameter(T′, η::T, tol) where {T <: AbstractFloat}
-    y = 8η / T′
+function dhs_msa_parameter(liquid::DipolarHardSpheres, tol)
+    y = 8 * liquid.η / liquid.T′
 
     ξ = 0.499 # 0 < ξ < 1 / 2
 
@@ -54,17 +57,10 @@ function dhs_msa_parameter(T′, η::T, tol) where {T <: AbstractFloat}
         end
     end
 
-    return ξ / η
+    return ξ / liquid.η
 end
 
-density_param(a::ApproximationScheme) = a.η
-density_param(a::VerletWeis) = density_param(a.py)
-
-### Printing methods
-#Base.show(io::IO, f::StructureFactor) = print(io, f.u, ",", f.c)
-#function Base.show(io::IO, ::U) where {U <: InteractionPotential}
-#    print(io, nameof(U))
-#end
-#function Base.show(io::IO, c::C) where {C <: ApproximationScheme}
-#    print(io, nameof(C), "(", density_param(c), ")")
-#end
+# Printing methods
+Base.show(io::IO, f::StructureFactor) = print(io, f.liquid, ",", f.c)
+Base.show(io::IO, ::L) where {L <: Liquid} = print(io, nameof(L))
+Base.show(io::IO, ::S) where {S <: ApproximationScheme} = print(io, nameof(S))
