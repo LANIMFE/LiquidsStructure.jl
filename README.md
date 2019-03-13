@@ -11,14 +11,13 @@ programming language.
 For the time being this library provides routines to calculate the structure
 factor of:
 
- - hard-spheres under the Percus--Yevick closure for the OZ relation,
- - hard-spheres under the Verlet--Weis approximation,
+ - hard-spheres under the Percus–Yevick closure for the OZ relation,
+ - hard-spheres under the Verlet–Weis approximation,
  - hard-disks under the Rosenfeld FMT approximation,
  - dipolar hard-spheres under the MSA approximation.
 
 **TODO**
 
-- [ ] Testing
 - [ ] Documentation and examples
 - [ ] Add more interaction potentials and approximation schemes
 

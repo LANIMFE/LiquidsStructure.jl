@@ -4,6 +4,10 @@ __precompile__()
 module LiquidsStructure
 
 
+### Imports
+using SpecialFunctions
+
+
 ### Implementation
 include("potentials.jl")
 include("schemes.jl")
@@ -12,9 +16,8 @@ include("utils.jl")
 
 
 ### Exports
-export ApproximationScheme, DipolarHardSphere, HardDisk, HardSphere,
-       InteractionPotential, MSA, PercusYevick, RosenfeldFMT, StructureFactor,
-       VerletWeis,
+export DipolarHardSphere, HardDisk, HardSphere,
+       MSA, PercusYevick, RosenfeldFMT, StructureFactor, VerletWeis,
        dimension, structure_factor
 
 
