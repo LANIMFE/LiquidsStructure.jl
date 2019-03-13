@@ -1,5 +1,7 @@
 # LiquidsStructure.jl
 
+[![Build Status](https://app.codeship.com/projects/9fcab2f0-271b-0137-ca37-1e86d73d396b/status?branch=master)
+
 This library intended to provide a mean to compute the structure factor of a
 variety of liquids with different interaction potentials and under different
 approximation schemes (e.g. Percus–Yevick closure for the Ornstein–Zernike
@@ -23,11 +25,11 @@ factor of:
 
 ## Installation
 
-`LiquidsStructure.jl` should work on Julia 0.6 and later versions and can be
+`LiquidsStructure.jl` should work on Julia 1.0 and later versions and can be
 installed from a Julia session by running
 
 ```julia
-julia> Pkg.clone("https://github.com/LANIMFE/LiquidsStructure.jl.git")
+julia> Pkg.add(PackageSpec(url = "https://github.com/LANIMFE/LiquidsStructure.jl.git"))
 ```
 
 ## Usage
