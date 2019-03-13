@@ -1,6 +1,6 @@
 # LiquidsStructure.jl
 
-[![Build Status](https://app.codeship.com/projects/9fcab2f0-271b-0137-ca37-1e86d73d396b/status?branch=master)
+[![Build Status](https://app.codeship.com/projects/9fcab2f0-271b-0137-ca37-1e86d73d396b/status?branch=master)](https://app.codeship.com/projects/330530)
 
 This library intended to provide a mean to compute the structure factor of a
 variety of liquids with different interaction potentials and under different
