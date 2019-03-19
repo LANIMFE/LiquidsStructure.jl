@@ -300,3 +300,95 @@ end
     @test all( f(2π ) .≈ (0.0001727400947607701, 1.3773111025661495, 0.9452081841208045) )
     @test all( f(k∞ ) .≈ (1.0, 1.0, 1.0) )
 end
+
+@testset "DipolarHardSpheres, MSA–PercusYevick–VerletWeis" begin
+    η = 0.1
+    f₁ = StructureFactor(HardSpheres(η), PercusYevick)
+    g₁ = StructureFactor(DipolarHardSpheres(η, 1.0), MSA{PercusYevick})
+    f₂ = StructureFactor(HardSpheres(η), VerletWeis)
+    g₂ = StructureFactor(DipolarHardSpheres(η, 1.0), MSA{VerletWeis})
+    k = 0.0
+    v₁, v₂ = g₁(k), g₂(k)
+    @test v₁[1] == f₁(k)
+    @test v₂[1] == f₂(k)
+    @test v₁[2] == v₂[2]
+    @test v₁[3] == v₂[3]
+    k = π / 2
+    v₁, v₂ = g₁(k), g₂(k)
+    @test v₁[1] == f₁(k)
+    @test v₂[1] == f₂(k)
+    @test v₁[2] == v₂[2]
+    @test v₁[3] == v₂[3]
+    k = 1π
+    v₁, v₂ = g₁(k), g₂(k)
+    @test v₁[1] == f₁(k)
+    @test v₂[1] == f₂(k)
+    @test v₁[2] == v₂[2]
+    @test v₁[3] == v₂[3]
+    k = 2π
+    v₁, v₂ = g₁(k), g₂(k)
+    @test v₁[1] == f₁(k)
+    @test v₂[1] == f₂(k)
+    @test v₁[2] == v₂[2]
+    @test v₁[3] == v₂[3]
+
+    η = 0.45
+    f₁ = StructureFactor(HardSpheres(η), PercusYevick)
+    g₁ = StructureFactor(DipolarHardSpheres(η, 1.0), MSA{PercusYevick})
+    f₂ = StructureFactor(HardSpheres(η), VerletWeis)
+    g₂ = StructureFactor(DipolarHardSpheres(η, 1.0), MSA{VerletWeis})
+    k = 0.0
+    v₁, v₂ = g₁(k), g₂(k)
+    @test v₁[1] == f₁(k)
+    @test v₂[1] == f₂(k)
+    @test v₁[2] == v₂[2]
+    @test v₁[3] == v₂[3]
+    k = π / 2
+    v₁, v₂ = g₁(k), g₂(k)
+    @test v₁[1] == f₁(k)
+    @test v₂[1] == f₂(k)
+    @test v₁[2] == v₂[2]
+    @test v₁[3] == v₂[3]
+    k = 1π
+    v₁, v₂ = g₁(k), g₂(k)
+    @test v₁[1] == f₁(k)
+    @test v₂[1] == f₂(k)
+    @test v₁[2] == v₂[2]
+    @test v₁[3] == v₂[3]
+    k = 2π
+    v₁, v₂ = g₁(k), g₂(k)
+    @test v₁[1] == f₁(k)
+    @test v₂[1] == f₂(k)
+    @test v₁[2] == v₂[2]
+    @test v₁[3] == v₂[3]
+
+    η = 0.9
+    f₁ = StructureFactor(HardSpheres(η), PercusYevick)
+    g₁ = StructureFactor(DipolarHardSpheres(η, 1.0), MSA{PercusYevick})
+    f₂ = StructureFactor(HardSpheres(η), VerletWeis)
+    g₂ = StructureFactor(DipolarHardSpheres(η, 1.0), MSA{VerletWeis})
+    k = 0.0
+    v₁, v₂ = g₁(k), g₂(k)
+    @test v₁[1] == f₁(k)
+    @test v₂[1] == f₂(k)
+    @test v₁[2] == v₂[2]
+    @test v₁[3] == v₂[3]
+    k = π / 2
+    v₁, v₂ = g₁(k), g₂(k)
+    @test v₁[1] == f₁(k)
+    @test v₂[1] == f₂(k)
+    @test v₁[2] == v₂[2]
+    @test v₁[3] == v₂[3]
+    k = 1π
+    v₁, v₂ = g₁(k), g₂(k)
+    @test v₁[1] == f₁(k)
+    @test v₂[1] == f₂(k)
+    @test v₁[2] == v₂[2]
+    @test v₁[3] == v₂[3]
+    k = 2π
+    v₁, v₂ = g₁(k), g₂(k)
+    @test v₁[1] == f₁(k)
+    @test v₂[1] == f₂(k)
+    @test v₁[2] == v₂[2]
+    @test v₁[3] == v₂[3]
+end
