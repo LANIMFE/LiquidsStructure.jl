@@ -9,16 +9,16 @@ using SpecialFunctions
 
 
 ### Implementation
-include("potentials.jl")
+include("liquids.jl")
 include("schemes.jl")
 include("structure.jl")
 include("utils.jl")
 
 
 ### Exports
-export DipolarHardSphere, HardDisk, HardSphere,
-       MSA, PercusYevick, RosenfeldFMT, StructureFactor, VerletWeis,
-       dimension, structure_factor
+export StructureFactor, DipolarHardSpheres, HardDisks, HardSpheres,
+       MSA, PercusYevick, RosenfeldFMT, VerletWeis,
+       dimensionality
 
 
 end # module
