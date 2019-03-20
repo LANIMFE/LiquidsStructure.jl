@@ -1,4 +1,6 @@
-struct StructureFactor{L, S}
+abstract type AbstractStructureFactor <: Function end
+
+struct StructureFactor{L, S} <: AbstractStructureFactor
     liquid::L
     scheme::S
 end
