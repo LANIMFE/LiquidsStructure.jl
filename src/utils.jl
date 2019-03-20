@@ -61,6 +61,11 @@ function dhs_msa_parameter(liquid::DipolarHardSpheres, tol)
 end
 
 # Printing methods
-Base.show(io::IO, f::StructureFactor) = print(io, f.liquid, ",", f.c)
-Base.show(io::IO, ::L) where {L <: Liquid} = print(io, nameof(L))
+Base.show(io::IO, f::StructureFactor) = print(io, f.liquid, ',', f.scheme)
 Base.show(io::IO, ::S) where {S <: ApproximationScheme} = print(io, nameof(S))
+Base.show(io::IO, ::MSA{SS}) where {SS} = print(io, "MSA{", nameof(SS), '}')
+function Base.show(io::IO, liquid::L) where {L <: Liquid}
+    names = fieldnames(L)
+    params = join((string(s, '=', getfield(liquid, s)) for s in names), ',')
+    print(io, nameof(L), '(', params, ')')
+end
