@@ -6,9 +6,6 @@ Returns the dimensionality of a liquid system.
 dimensionality(::L) where {N, L <: Liquid{N}} = N
 dimensionality(sk::StructureFactor) = dimensionality(sk.u)
 
-matching_liquid(PercusYevick) = HardSpheres
-matching_liquid(VerletWeis) = HardSpheres
-
 """
     dhs_msa_parameter(T′, η::T, tol)
 
