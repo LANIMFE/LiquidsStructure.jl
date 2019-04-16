@@ -61,3 +61,8 @@ julia> plot(k -> S(k), 0, 10π, label = "S(k)")
 ```
 
 ![Example image](assets/example.png?raw=true)
+
+## Acknowledgements
+
+This project was developed with support from CONACYT through the Laboratorio
+Nacional de Ingeniería de la Materia Fuera de Equilibrio (LANIMFE).
