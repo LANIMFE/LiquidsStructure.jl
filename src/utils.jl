@@ -4,7 +4,7 @@
 Returns the dimensionality of a liquid system.
 """
 dimensionality(::L) where {N, L <: Liquid{N}} = N
-dimensionality(sk::StructureFactor) = dimensionality(sk.u)
+dimensionality(sk::StructureFactor) = dimensionality(sk.liquid)
 
 """
     dhs_msa_parameter(T′, η::T, tol)
