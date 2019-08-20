@@ -20,6 +20,11 @@ struct VerletWeis{T <: AbstractFloat} <: IsotropicApproximationScheme{T}
     α::T
 end
 
+struct SharmaSharma{S, T <: AbstractFloat} <: IsotropicApproximationScheme{T}
+    coreliquid::HardSpheres{T}
+    subscheme::S
+end
+
 struct MSA{S, T <: AbstractFloat} <: ApproximationScheme{T}
     coreliquid::HardSpheres{T}
     subscheme::S
@@ -82,6 +87,17 @@ function VerletWeis(liquid::HardSpheres{T}) where {T <: AbstractFloat}
     subscheme = PercusYevick(coreliquid)
 
     return VerletWeis{T}(coreliquid, subscheme, α)
+end
+
+function SharmaSharma{SS}(liquid::AttractiveHardSpheres{U, T}) where
+    {SS <: IsotropicApproximationScheme, U, T <: AbstractFloat}
+
+    η = liquid.η
+    coreliquid = HardSpheres(η)
+    subscheme = SS(coreliquid)
+    S = typeof(subscheme)
+
+    return SharmaSharma{S, T}(coreliquid, subscheme)
 end
 
 function MSA{SS}(liquid::DipolarHardSpheres{T}; tol = √(eps(T))) where

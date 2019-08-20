@@ -19,21 +19,21 @@ Returns the static structure factor of a `liquid` using the approximation
 defined by `scheme` at the wavevector value `k`.
 """
 function structure_factor(liquid, scheme, k)
-    ρCk = ρĈ(liquid, scheme, k)
-    return 1 / (1 - ρCk)
+    Ck = Ĉ(liquid, scheme, k)
+    return 1 / (1 - Ck)
 end
 
 function structure_factor(liquid::DipolarHardSpheres, scheme::MSA, k)
-    ρC₀₀k, ρC₁₀k, ρC₁₁k = ρĈ(liquid, scheme, k)
+    C₀₀k, C₁₀k, C₁₁k = Ĉ(liquid, scheme, k)
 
-    S₀₀k = 1 / (1 - ρC₀₀k)
-    S₁₀k = 1 / (1 - ρC₁₀k)
-    S₁₁k = 1 / (1 - ρC₁₁k)
+    S₀₀k = 1 / (1 - C₀₀k)
+    S₁₀k = 1 / (1 - C₁₀k)
+    S₁₁k = 1 / (1 - C₁₁k)
 
     return (S₀₀k, S₁₀k, S₁₁k)
 end
 
-function ρĈ(liquid::HardDisks, scheme::RosenfeldFMT, k)
+function Ĉ(liquid::HardDisks, scheme::RosenfeldFMT, k)
     η = liquid.η
 
     A, B, G = scheme.A, scheme.B, scheme.G
@@ -53,15 +53,15 @@ function ρĈ(liquid::HardDisks, scheme::RosenfeldFMT, k)
 end
 
 """
-    ρĈ(liquid::HardSpheres, scheme::PercusYevick, k)
+    Ĉ(liquid::HardSpheres, scheme::PercusYevick, k)
 
-Returns the product of the bulk density and the fourier transform of the direct
+Returns the product of the bulk density and the Fourier transform of the direct
 correlation function for a hard-spheres liquid using the Percus-Yevick
 approximation.
 
 `k` is the wavevector value
 """
-function ρĈ(liquid::HardSpheres, scheme::PercusYevick, k)
+function Ĉ(liquid::HardSpheres, scheme::PercusYevick, k)
     η = liquid.η
 
     α, β, δ = scheme.α, scheme.β, scheme.δ
@@ -86,27 +86,51 @@ function ρĈ(liquid::HardSpheres, scheme::PercusYevick, k)
 end
 
 """
-    ρĈ(::HardSpheres, ::VerletWeis, k)
+    Ĉ(::HardSpheres, ::VerletWeis, k)
 
-Returns the product of the bulk density and the fourier transform of the direct
+Returns the product of the bulk density and the Fourier transform of the direct
 correlation function for a hard-spheres liquid using the Percus-Yevick
 approximation with the Verlet-Weis correction.
 
 `k` is the wavevector value
 """
-ρĈ(liquid::HardSpheres, scheme::VerletWeis, k) =
-    ρĈ(scheme.coreliquid, scheme.subscheme, scheme.α * k)
+Ĉ(liquid::HardSpheres, scheme::VerletWeis, k) =
+    Ĉ(scheme.coreliquid, scheme.subscheme, scheme.α * k)
+
+function Ĉ(liquid::AttractiveHardSpheres{U}, scheme::SharmaSharma, k′) where
+    {U <: Yukawa}
+
+    η  = liquid.η
+    T′ = liquid.T′
+    Z  = liquid.potential.Z
+    k  = liquid.potential.σ * k′
+
+    Z² = Z * Z
+    k² = k * k
+    k⁴ = k² * k²
+    sink, cosk = sin(k), cos(k)
+
+    smallk = k < 0.075
+
+    C = smallk ? ((1 + Z) - (3 + Z) / 6 * k² + (5 + Z) / 120 * k⁴) :
+                  (k * cosk + Z * sink) / k
+    C = C / (k² + Z²)
+
+    C₀ = Ĉ(scheme.coreliquid, scheme.subscheme, k′)
+
+    return C₀ + 24η / T′ * C
+end
 
 """
-    ρĈ(liquid::DipolarHardSpheres, scheme::MSA, k)
+    Ĉ(liquid::DipolarHardSpheres, scheme::MSA, k)
 
-Returns the product of the bulk density and the fourier transform of
-projections of the direct correlation function `(ρC₀₀, ρC₁₀, ρC₁₁)` for a
+Returns the product of the bulk density and the Fourier transform of
+projections of the direct correlation function `(C₀₀, C₁₀, C₁₁)` for a
 dipolar hard-spheres liquid using the MSA approximation.
 
 `k` is the wavevector value
 """
-function ρĈ(liquid::DipolarHardSpheres, scheme::MSA, k)
+function Ĉ(liquid::DipolarHardSpheres, scheme::MSA, k)
     η = liquid.η
 
     α₀, α₁, α₂, α₃ = scheme.α₀, scheme.α₁, scheme.α₂, scheme.α₃
@@ -128,9 +152,9 @@ function ρĈ(liquid::DipolarHardSpheres, scheme::MSA, k)
                     (-b₃ + ((b₁ + b₃ / 2) - (α₂ -  β₂) * k² / 3) * k²) * cosk
                    ) / k⁶
 
-    ρC₀₀ = ρĈ(scheme.coreliquid, scheme.subscheme, k)
-    ρC₁₀ = 24η * C₁₀
-    ρC₁₁ = 24η * C₁₁
+    C₀₀ = Ĉ(scheme.coreliquid, scheme.subscheme, k)
+    C₁₀ = 24η * C₁₀
+    C₁₁ = 24η * C₁₁
 
-    return (ρC₀₀, ρC₁₀, ρC₁₁)
+    return (C₀₀, C₁₀, C₁₁)
 end
