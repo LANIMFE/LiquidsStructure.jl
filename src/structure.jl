@@ -12,7 +12,28 @@ end
 
 (S::StructureFactor)(k) = structure_factor(S.liquid, S.scheme, k)
 
-function structure_factor(liquid::HardDisks, scheme::RosenfeldFMT, k)
+"""
+    structure_factor(liquid, scheme, k)
+
+Returns the static structure factor of a `liquid` using the approximation
+defined by `scheme` at the wavevector value `k`.
+"""
+function structure_factor(liquid, scheme, k)
+    Ck = Ĉ(liquid, scheme, k)
+    return 1 / (1 - Ck)
+end
+
+function structure_factor(liquid::DipolarHardSpheres, scheme::MSA, k)
+    C₀₀k, C₁₀k, C₁₁k = Ĉ(liquid, scheme, k)
+
+    S₀₀k = 1 / (1 - C₀₀k)
+    S₁₀k = 1 / (1 - C₁₀k)
+    S₁₁k = 1 / (1 - C₁₁k)
+
+    return (S₀₀k, S₁₀k, S₁₁k)
+end
+
+function Ĉ(liquid::HardDisks, scheme::RosenfeldFMT, k)
     η = liquid.η
 
     A, B, G = scheme.A, scheme.B, scheme.G
@@ -28,20 +49,19 @@ function structure_factor(liquid::HardDisks, scheme::RosenfeldFMT, k)
                   G * (1 -  k² / 8 )) :
                  (A * (2J₁ / k)^2 + B * 2J₀ * J₁ / k + G * 2J₁′ / k)
 
-    Ck = -4η * C
-
-    return Sk = 1 / (1 - Ck)
+    return -4η * C
 end
 
 """
-    structure_factor(liquid::HardSpheres, scheme::PercusYevick, k)
+    Ĉ(liquid::HardSpheres, scheme::PercusYevick, k)
 
-Returns the static structure factor for a hard-spheres liquid using the
-Percus-Yevick approximation.
+Returns the product of the bulk density and the Fourier transform of the direct
+correlation function for a hard-spheres liquid using the Percus-Yevick
+approximation.
 
 `k` is the wavevector value
 """
-function structure_factor(liquid::HardSpheres, scheme::PercusYevick, k)
+function Ĉ(liquid::HardSpheres, scheme::PercusYevick, k)
     η = liquid.η
 
     α, β, δ = scheme.α, scheme.β, scheme.δ
@@ -62,32 +82,55 @@ function structure_factor(liquid::HardSpheres, scheme::PercusYevick, k)
     C₃ = smallk ? (1 - k² / 8 ) / 6 :
                   ((4k³ - 24k) * sink - (k⁴ - 12k² + 24) * cosk + 24) / k⁶
 
-    Ck = 24η * (α * C₀ + β * C₁ + δ * C₃)
-
-    return Sk = 1 / (1 - Ck)
+    return 24η * (α * C₀ + β * C₁ + δ * C₃)
 end
 
 """
-    structure_factor(::HardSpheres, ::VerletWeis, k)
+    Ĉ(::HardSpheres, ::VerletWeis, k)
 
-Returns the static structure factor for hard-spheres liquid
-using the Percus-Yevick approximation with the Verlet-Weis
-correction.
-
-`k` is the wavevector value
-"""
-structure_factor(liquid::HardSpheres, scheme::VerletWeis, k) =
-    structure_factor(scheme.coreliquid, scheme.subscheme, scheme.α * k)
-
-"""
-    structure_factor(liquid::DipolarHardSpheres, scheme::MSA, k)
-
-Returns the the proyections of the static structure factor `(S₀₀, S₁₀, S₁₁)`
-for a dipolar hard-spheres liquid using the MSA approximation.
+Returns the product of the bulk density and the Fourier transform of the direct
+correlation function for a hard-spheres liquid using the Percus-Yevick
+approximation with the Verlet-Weis correction.
 
 `k` is the wavevector value
 """
-function structure_factor(liquid::DipolarHardSpheres, scheme::MSA, k)
+Ĉ(liquid::HardSpheres, scheme::VerletWeis, k) =
+    Ĉ(scheme.coreliquid, scheme.subscheme, scheme.α * k)
+
+function Ĉ(liquid::AttractiveHardSpheres{U}, scheme::SharmaSharma, k′) where
+    {U <: Yukawa}
+
+    η  = liquid.η
+    T′ = liquid.T′
+    Z  = liquid.potential.Z
+    k  = liquid.potential.σ * k′
+
+    Z² = Z * Z
+    k² = k * k
+    k⁴ = k² * k²
+    sink, cosk = sin(k), cos(k)
+
+    smallk = k < 0.075
+
+    C = smallk ? ((1 + Z) - (3 + Z) / 6 * k² + (5 + Z) / 120 * k⁴) :
+                  (k * cosk + Z * sink) / k
+    C = C / (k² + Z²)
+
+    C₀ = Ĉ(scheme.coreliquid, scheme.subscheme, k′)
+
+    return C₀ + 24η / T′ * C
+end
+
+"""
+    Ĉ(liquid::DipolarHardSpheres, scheme::MSA, k)
+
+Returns the product of the bulk density and the Fourier transform of
+projections of the direct correlation function `(C₀₀, C₁₀, C₁₁)` for a
+dipolar hard-spheres liquid using the MSA approximation.
+
+`k` is the wavevector value
+"""
+function Ĉ(liquid::DipolarHardSpheres, scheme::MSA, k)
     η = liquid.η
 
     α₀, α₁, α₂, α₃ = scheme.α₀, scheme.α₁, scheme.α₂, scheme.α₃
@@ -109,12 +152,9 @@ function structure_factor(liquid::DipolarHardSpheres, scheme::MSA, k)
                     (-b₃ + ((b₁ + b₃ / 2) - (α₂ -  β₂) * k² / 3) * k²) * cosk
                    ) / k⁶
 
-    Ck₁₀ = 24η * C₁₀
-    Ck₁₁ = 24η * C₁₁
+    C₀₀ = Ĉ(scheme.coreliquid, scheme.subscheme, k)
+    C₁₀ = 24η * C₁₀
+    C₁₁ = 24η * C₁₁
 
-    Sk₀₀ = structure_factor(scheme.coreliquid, scheme.subscheme, k)
-    Sk₁₀ = 1 / (1 - Ck₁₀)
-    Sk₁₁ = 1 / (1 - Ck₁₁)
-
-    return (Sk₀₀, Sk₁₀, Sk₁₁)
+    return (C₀₀, C₁₀, C₁₁)
 end
