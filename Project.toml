@@ -1,5 +1,7 @@
 name = "LiquidsStructure"
 uuid = "3b2fbd69-638f-58f2-a86a-379d5727c4f6"
+authors = ["Pablo Zubieta, Jesús Zepeda"]
+version = "0.1.0"
 
 [compat]
 julia = "≥ 1.0.0"
