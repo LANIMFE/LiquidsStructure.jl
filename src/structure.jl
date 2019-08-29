@@ -97,6 +97,17 @@ approximation with the Verlet-Weis correction.
 Ĉ(liquid::HardSpheres, scheme::VerletWeis, k) =
     Ĉ(scheme.coreliquid, scheme.subscheme, scheme.α * k)
 
+"""
+    Ĉ(liquid::AttractiveHardSpheres, scheme::SharmaSharma, k)
+    (Yukawa Potential Implementation):
+
+    u(r) =  -ϵσ * exp(-z*r/σ) / r
+
+    Returns the product of the bulk density and the Fourier transform of the direct
+    correlation function for an attractive hard-spheres liquid using the Sharma and Sharma
+    approximation, which requires an approximation for the hard sphere direct correlation function.
+    `k` is the wavevector value
+"""
 function Ĉ(liquid::AttractiveHardSpheres{U}, scheme::SharmaSharma, k′) where
     {U <: Yukawa}
 
