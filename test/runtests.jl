@@ -228,8 +228,9 @@ end
     @test f(k∞ ) ≈ 1.0
 end
 
-@testset "Attractive hard spheres, Sharma–Sharma" begin
+@testset "Yukawa Attractive hard spheres, Sharma–Sharma" begin
     Z  = 2.0
+    λ  = 1.5
     U  = Yukawa(Z)
 
     η  = 0.1
@@ -239,7 +240,6 @@ end
     @test f(π/2) ≈ 0.6863273179451208
     @test f(1π ) ≈ 0.6382449330348262
     @test f(2π ) ≈ 1.1517581024741745
-    @test f(k∞ ) ≈ 1.0
 
     η  = 0.2
     T′ = 1.0
@@ -312,6 +312,93 @@ end
     @test f(1π ) ≈ 0.0001225264983879417
     @test f(2π ) ≈ 0.0009580396021185613
     @test f(k∞ ) ≈ 1.0
+
+end
+
+@testset "Square Well Attractive hard spheres, Sharma–Sharma" begin
+    λ  = 1.5
+    U  = SquareWell(λ)
+
+    η  = 0.1
+    T′ = 1.0
+    f  = StructureFactor(AHS(η, T′, U), SharmaSharma{VerletWeis})
+    @test f(0.0) ≈ 3.5193435613655701
+    @test f(π/2) ≈ 0.92661127755109707
+    @test f(1π ) ≈ 0.58331796691647120
+    @test f(2π ) ≈ 1.2962503853125780
+
+    η  = 0.2
+    T′ = 1.0
+    f  = StructureFactor(AHS(η, T′, U), SharmaSharma{VerletWeis})
+    @test f(0.0) ≈ 1.1209371060679321
+    @test f(π/2) ≈ 0.44614027958622848
+    @test f(1π ) ≈ 0.33507838902406228
+    @test f(2π ) ≈ 1.9721579006903056
+    @test f(k∞ ) ≈ 1.0
+
+    η  = 0.3
+    T′ = 0.75
+    f  = StructureFactor(AHS(η, T′, U), SharmaSharma{VerletWeis})
+    @test f(0.0) ≈ 0.38735928482005272
+    @test f(π/2) ≈ 0.19885016413408196
+    @test f(1π ) ≈ 0.16879151714668816
+    @test f(2π ) ≈ 16.010240228035098
+    @test f(k∞ ) ≈ 1.0
+
+    η  = 0.4
+    T′ = 0.75
+    f  = StructureFactor(AHS(η, T′, U), SharmaSharma{VerletWeis})
+    @test f(0.0) ≈ 7.8430925994702708e-2
+    @test f(π/2) ≈ 6.9217956774394074e-2
+    @test f(1π ) ≈ 8.2504930426001266e-2
+    @test f(2π ) ≈ -4.3432773350119831
+    @test f(k∞ ) ≈ 1.0
+
+    η  = 0.5
+    T′ = 1.5
+    f  = StructureFactor(AHS(η, T′, U), SharmaSharma{VerletWeis})
+    @test f(0.0) ≈ 2.0618522825051694e-2
+    @test f(π/2) ≈ 2.3224344950697608e-2
+    @test f(1π ) ≈ 3.7052366895499976e-2
+    @test f(2π ) ≈ 2.3936751366867295
+    @test f(k∞ ) ≈ 1.0
+
+    η  = 0.6
+    T′ = 2.0
+    f  = StructureFactor(AHS(η, T′, U), SharmaSharma{VerletWeis})
+    @test f(0.0) ≈ 7.1406640933698879e-3
+    @test f(π/2) ≈ 8.2758206645957878e-3
+    @test f(1π ) ≈ 1.3598245019352462e-2
+    @test f(2π ) ≈ 0.33190285202602476
+    @test f(k∞ ) ≈ 1.0
+
+    η  = 0.7
+    T′ = 2.0
+    f  = StructureFactor(AHS(η, T′, U), SharmaSharma{VerletWeis})
+    @test f(0.0) ≈ 2.2168215473822354e-3
+    @test f(π/2) ≈ 2.5696376277179267e-3
+    @test f(1π ) ≈ 4.1395889487837005e-3
+    @test f(2π ) ≈ 5.9305356062453886e-2
+    @test f(k∞ ) ≈ 1.0
+
+    η  = 0.8
+    T′ = 2.0
+    f  = StructureFactor(AHS(η, T′, U), SharmaSharma{VerletWeis})
+    @test f(0.0) ≈ 5.2453169154913833e-4
+    @test f(π/2) ≈ 6.0431333832571899e-4
+    @test f(1π ) ≈ 9.4538720482588478e-4
+    @test f(2π ) ≈ 9.4952595505868632e-3
+    @test f(k∞ ) ≈ 1.0
+
+    η  = 0.9
+    T′ = 2.0
+    f  = StructureFactor(AHS(η, T′, U), SharmaSharma{VerletWeis})
+    @test f(0.0) ≈ 7.0717262118774555e-5
+    @test f(π/2) ≈ 8.0783923331053070e-5
+    @test f(1π ) ≈ 1.2251653217610584e-4
+    @test f(2π ) ≈ 9.5843950557686168e-4
+    @test f(k∞ ) ≈ 1.0
+
 end
 
 @testset "SharmaSharma{VerletWeis} with no attraction versus VerletWeis" begin
