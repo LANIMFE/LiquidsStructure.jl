@@ -19,7 +19,7 @@ include("utils.jl")
 ### Exports
 export StructureFactor, AttractiveHardSpheres, DipolarHardSpheres, HardDisks,
        HardSpheres, MSA, PercusYevick, RosenfeldFMT, SharmaSharma, VerletWeis,
-       Yukawa, dimensionality
+       Yukawa, SquareWell, dimensionality
 
 
 end # module
