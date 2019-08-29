@@ -97,6 +97,17 @@ approximation with the Verlet-Weis correction.
 Ĉ(liquid::HardSpheres, scheme::VerletWeis, k) =
     Ĉ(scheme.coreliquid, scheme.subscheme, scheme.α * k)
 
+"""
+    Ĉ(liquid::AttractiveHardSpheres, scheme::SharmaSharma, k)
+    (Yukawa Potential Implementation):
+
+    u(r) =  -ϵσ * exp(-z*r/σ) / r
+
+    Returns the product of the bulk density and the Fourier transform of the direct
+    correlation function for an attractive hard-spheres liquid using the Sharma and Sharma
+    approximation, which requires an approximation for the hard sphere direct correlation function.
+    `k` is the wavevector value
+"""
 function Ĉ(liquid::AttractiveHardSpheres{U}, scheme::SharmaSharma, k′) where
     {U <: Yukawa}
 
@@ -115,6 +126,45 @@ function Ĉ(liquid::AttractiveHardSpheres{U}, scheme::SharmaSharma, k′) where
     C = smallk ? ((1 + Z) - (3 + Z) / 6 * k² + (5 + Z) / 120 * k⁴) :
                   (k * cosk + Z * sink) / k
     C = C / (k² + Z²)
+
+    C₀ = Ĉ(scheme.coreliquid, scheme.subscheme, k′)
+
+    return C₀ + 24η / T′ * C
+end
+
+"""
+    Ĉ(liquid::AttractiveHardSpheres, scheme::SharmaSharma, k)
+
+    (Square Well Potential Implementation):
+
+    u(r) =  -ϵσ ∀  σ < r ≤ λσ
+
+    Returns the product of the bulk density and the Fourier transform of the direct
+    correlation function for an attractive hard-spheres liquid using the Sharma and Sharma
+    approximation, which requires an approximation for the hard sphere direct correlation function.
+
+    `k` is the wavevector value
+"""
+function Ĉ(liquid::AttractiveHardSpheres{U}, scheme::SharmaSharma, k′) where
+    {U <: SquareWell}
+
+    η  = liquid.η
+    T′ = liquid.T′
+    λ  = liquid.potential.λ
+    k  = liquid.potential.σ * k′
+
+    k² = k * k
+    k³ = k² * k
+    k⁴ = k² * k²
+    λ³ = λ * λ * λ
+    λ⁵ = λ³ * λ * λ
+    sink, cosk = sin(k), cos(k)
+    sinλk, cosλk = sin(λ*k), cos(λ*k)
+
+    smallk = k < 0.075
+
+    C = smallk ? (1.0/3.0) * (λ³-1.0) - (1.0/30.0) * (λ⁵-1.0) * k² :
+                (cosk - λ * cosλk)/k² + (sinλk - sink)/k³
 
     C₀ = Ĉ(scheme.coreliquid, scheme.subscheme, k′)
 
