@@ -16,7 +16,7 @@ end
     structure_factor(liquid, scheme, k)
 
 Returns the static structure factor of a `liquid` using the approximation
-defined by `scheme` at the wavevector value `k`.
+defined by `scheme` at the wavenumber `k`.
 """
 function structure_factor(liquid, scheme, k)
     Ck = Ĉ(liquid, scheme, k)
@@ -59,7 +59,7 @@ Returns the product of the bulk density and the Fourier transform of the direct
 correlation function for a hard-spheres liquid using the Percus-Yevick
 approximation.
 
-`k` is the wavevector value
+`k` is the wavenumber.
 """
 function Ĉ(liquid::HardSpheres, scheme::PercusYevick, k)
     η = liquid.η
@@ -70,7 +70,6 @@ function Ĉ(liquid::HardSpheres, scheme::PercusYevick, k)
     k³ = k² * k
     k⁴ = k² * k²
     k⁶ = k³ * k³
-
     sink, cosk = sin(k), cos(k)
 
     smallk = k < 0.075
@@ -92,40 +91,44 @@ Returns the product of the bulk density and the Fourier transform of the direct
 correlation function for a hard-spheres liquid using the Percus-Yevick
 approximation with the Verlet-Weis correction.
 
-`k` is the wavevector value
+`k` is the wavenumber.
 """
 Ĉ(liquid::HardSpheres, scheme::VerletWeis, k) =
     Ĉ(scheme.coreliquid, scheme.subscheme, scheme.α * k)
 
 """
-    Ĉ(liquid::AttractiveHardSpheres, scheme::SharmaSharma, k)
-    (Yukawa Potential Implementation):
+    Ĉ(::AttractiveHardSpheres{<:Yukawa}, ::SharmaSharma, k)
 
-    u(r) =  -ϵσ * exp(-z*r/σ) / r
+Returns the product of the bulk density and the Fourier transform (FT) of the
+direct correlation function for an attractive Yukawa hard-spheres liquid using
+the Sharma and Sharma approximation, that is, the sum of the FT of the direct
+correlation function for the hard spheres core and ``\\beta\\cdot\\hat{u}(k)``,
+where ``\\hat{u}(k)`` is the FT of the Yukawa potential:
 
-    Returns the product of the bulk density and the Fourier transform of the direct
-    correlation function for an attractive hard-spheres liquid using the Sharma and Sharma
-    approximation, which requires an approximation for the hard sphere direct correlation function.
-    `k` is the wavevector value
+```math
+    u(r) = -\\epsilon\\exp(-zr/\\sigma) / (r/\\sigma)
+```
+
+`k` is the wavenumber.
 """
 function Ĉ(liquid::AttractiveHardSpheres{U}, scheme::SharmaSharma, k′) where
     {U <: Yukawa}
 
     η  = liquid.η
     T′ = liquid.T′
-    Z  = liquid.potential.Z
+    z  = liquid.potential.z
     k  = liquid.potential.σ * k′
 
-    Z² = Z * Z
+    z² = z * z
     k² = k * k
     k⁴ = k² * k²
     sink, cosk = sin(k), cos(k)
 
     smallk = k < 0.075
 
-    C = smallk ? ((1 + Z) - (3 + Z) / 6 * k² + (5 + Z) / 120 * k⁴) :
-                  (k * cosk + Z * sink) / k
-    C = C / (k² + Z²)
+    C = smallk ? ((1 + z) - (3 + z) / 6 * k² + (5 + z) / 120 * k⁴) :
+                  (k * cosk + z * sink) / k
+    C = C / (k² + z²)
 
     C₀ = Ĉ(scheme.coreliquid, scheme.subscheme, k′)
 
@@ -133,17 +136,20 @@ function Ĉ(liquid::AttractiveHardSpheres{U}, scheme::SharmaSharma, k′) where
 end
 
 """
-    Ĉ(liquid::AttractiveHardSpheres, scheme::SharmaSharma, k)
+    Ĉ(::AttractiveHardSpheres{<:SquareWell}, ::SharmaSharma, k)
 
-    (Square Well Potential Implementation):
+Returns the product of the bulk density and the Fourier transform (FT) of the
+direct correlation function for an attractive square-well hard-spheres liquid
+using the Sharma and Sharma approximation, that is, the sum of the FT of the
+direct correlation function for the hard spheres core and
+``\\beta\\cdot\\hat{u}(k)``, where ``\\hat{u}(k)`` is the FT of the square well
+potential:
 
-    u(r) =  -ϵσ ∀  σ < r ≤ λσ
+```math
+    u(r) = -\\epsilon\\sigma, \\qquad \\sigma < r \\le \\lambda\\sigma
+```
 
-    Returns the product of the bulk density and the Fourier transform of the direct
-    correlation function for an attractive hard-spheres liquid using the Sharma and Sharma
-    approximation, which requires an approximation for the hard sphere direct correlation function.
-
-    `k` is the wavevector value
+`k` is the wavenumber.
 """
 function Ĉ(liquid::AttractiveHardSpheres{U}, scheme::SharmaSharma, k′) where
     {U <: SquareWell}
@@ -155,16 +161,15 @@ function Ĉ(liquid::AttractiveHardSpheres{U}, scheme::SharmaSharma, k′) where
 
     k² = k * k
     k³ = k² * k
-    k⁴ = k² * k²
     λ³ = λ * λ * λ
     λ⁵ = λ³ * λ * λ
     sink, cosk = sin(k), cos(k)
-    sinλk, cosλk = sin(λ*k), cos(λ*k)
+    sinλk, cosλk = sin(λ * k), cos(λ * k)
 
     smallk = k < 0.075
 
-    C = smallk ? (1.0/3.0) * (λ³-1.0) - (1.0/30.0) * (λ⁵-1.0) * k² :
-                (cosk - λ * cosλk)/k² + (sinλk - sink)/k³
+    C = smallk ? (λ³ - 1) / 3 - (λ⁵ - 1) / 30 * k² :
+                 (cosk - λ * cosλk) / k² + (sinλk - sink) / k³
 
     C₀ = Ĉ(scheme.coreliquid, scheme.subscheme, k′)
 
@@ -178,7 +183,7 @@ Returns the product of the bulk density and the Fourier transform of
 projections of the direct correlation function `(C₀₀, C₁₀, C₁₁)` for a
 dipolar hard-spheres liquid using the MSA approximation.
 
-`k` is the wavevector value
+`k` is the wavenumber.
 """
 function Ĉ(liquid::DipolarHardSpheres, scheme::MSA, k)
     η = liquid.η

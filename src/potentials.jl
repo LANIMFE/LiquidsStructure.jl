@@ -1,18 +1,18 @@
 abstract type Potential end
 
 struct Yukawa{T} <: Potential
-    Z::T
+    z::T
     σ::T
     ϵ::T
 end
 
-function Yukawa(Z; σ = 1.0, ϵ = 1.0)
-    @assert Z > 0
+function Yukawa(z; σ = 1.0, ϵ = 1.0)
+    @assert z > 0
     @assert σ > 0
 
-    Z′, σ′, ϵ′ = promote(Z, σ, ϵ)
+    z′, σ′, ϵ′ = promote(z, σ, ϵ)
 
-    return Yukawa{typeof(Z′)}(Z′, σ′, ϵ′)
+    return Yukawa{typeof(z′)}(z′, σ′, ϵ′)
 end
 
 struct SquareWell{T} <: Potential
