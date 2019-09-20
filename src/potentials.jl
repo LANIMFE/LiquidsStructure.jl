@@ -1,6 +1,17 @@
-abstract type Potential end
+abstract type PotentialSymmetry end
+abstract type Isotropic   <: PotentialSymmetry end
+abstract type Anisotropic <: PotentialSymmetry end
 
-struct Yukawa{T} <: Potential
+abstract type Potential{Symmetry} end
+
+abstract type CorePotential{S}       <: Potential{S} end
+abstract type LongRangePotential{S}  <: Potential{S} end
+abstract type ShortRangePotential{S} <: Potential{S} end
+
+abstract type HardCorePotential{S} <: CorePotential{S} end
+abstract type SoftCorePotential{S} <: CorePotential{S} end
+
+struct Yukawa{T} <: LongRangePotential{Isotropic}
     z::T
     σ::T
     ϵ::T
@@ -15,7 +26,7 @@ function Yukawa(z; σ = 1.0, ϵ = 1.0)
     return Yukawa{typeof(z′)}(z′, σ′, ϵ′)
 end
 
-struct SquareWell{T} <: Potential
+struct SquareWell{T} <: ShortRangePotential{Isotropic}
     λ::T
     σ::T
     ϵ::T
