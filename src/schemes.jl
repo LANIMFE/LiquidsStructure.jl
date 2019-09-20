@@ -1,26 +1,25 @@
 ### Types
 abstract type ApproximationScheme{T} end
-abstract type IsotropicApproximationScheme{T} <: ApproximationScheme{T} end
 
-struct RosenfeldFMT{T <: AbstractFloat} <: IsotropicApproximationScheme{T}
+struct RosenfeldFMT{T <: AbstractFloat} <: ApproximationScheme{T}
     A::T
     B::T
     G::T
 end
 
-struct PercusYevick{T <: AbstractFloat} <: IsotropicApproximationScheme{T}
+struct PercusYevick{T <: AbstractFloat} <: ApproximationScheme{T}
     α::T
     β::T
     δ::T
 end
 
-struct VerletWeis{T <: AbstractFloat} <: IsotropicApproximationScheme{T}
+struct VerletWeis{T <: AbstractFloat} <: ApproximationScheme{T}
     coreliquid::HardSpheres{T}
     subscheme::PercusYevick{T}
     α::T
 end
 
-struct SharmaSharma{S, T <: AbstractFloat} <: IsotropicApproximationScheme{T}
+struct SharmaSharma{S, T <: AbstractFloat} <: ApproximationScheme{T}
     coreliquid::HardSpheres{T}
     subscheme::S
 end
@@ -90,7 +89,7 @@ function VerletWeis(liquid::HardSpheres{T}) where {T <: AbstractFloat}
 end
 
 function SharmaSharma{SS}(liquid::AttractiveHardSpheres{U, T}) where
-    {SS <: IsotropicApproximationScheme, U, T <: AbstractFloat}
+    {SS <: ApproximationScheme, U, T <: AbstractFloat}
 
     η = liquid.η
     coreliquid = HardSpheres(η)
@@ -101,7 +100,7 @@ function SharmaSharma{SS}(liquid::AttractiveHardSpheres{U, T}) where
 end
 
 function MSA{SS}(liquid::DipolarHardSpheres{T}; tol = √(eps(T))) where
-    {SS <: IsotropicApproximationScheme, T <: AbstractFloat}
+    {SS <: ApproximationScheme, T <: AbstractFloat}
 
     η, T′ = liquid.η, liquid.T′
     coreliquid = HardSpheres(η)
