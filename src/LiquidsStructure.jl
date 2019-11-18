@@ -6,10 +6,10 @@ using SpecialFunctions
 
 
 ### Exports
-export AttractiveHardSpheres, CompositePotential, DipolarHardSpheres,
-       DipoleDipole, HardCore, HardDisks, HardSpheres, MSA, PercusYevick,
-       RosenfeldFMT, SharmaSharma, SquareWell, StructureFactor, VerletWeis,
-       Yukawa, dimensionality
+export AbstractLiquid, AttractiveHardSpheres, CompositePotential,
+       DipolarHardSpheres, DipoleDipole, HardCore, HardDisks, HardSpheres, MSA,
+       PercusYevick, RosenfeldFMT, SharmaSharma, SquareWell, StructureFactor,
+       VerletWeis, Yukawa, dimensionality, temperature, volume_fraction
 
 
 ### Implementation
