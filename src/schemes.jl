@@ -1,30 +1,30 @@
 ### Types
-abstract type ApproximationScheme{T} end
+abstract type ApproximationScheme end
 
-struct RosenfeldFMT{T <: AbstractFloat} <: ApproximationScheme{T}
+struct RosenfeldFMT{T} <: ApproximationScheme
     A::T
     B::T
     G::T
 end
 
-struct PercusYevick{T <: AbstractFloat} <: ApproximationScheme{T}
+struct PercusYevick{T} <: ApproximationScheme
     α::T
     β::T
     δ::T
 end
 
-struct VerletWeis{T <: AbstractFloat} <: ApproximationScheme{T}
+struct VerletWeis{T} <: ApproximationScheme
     coreliquid::HardSpheres{T}
     subscheme::PercusYevick{T}
     α::T
 end
 
-struct SharmaSharma{S, T <: AbstractFloat} <: ApproximationScheme{T}
+struct SharmaSharma{S, T} <: ApproximationScheme
     coreliquid::HardSpheres{T}
     subscheme::S
 end
 
-struct MSA{S, T <: AbstractFloat} <: ApproximationScheme{T}
+struct MSA{S, T} <: ApproximationScheme
     coreliquid::HardSpheres{T}
     subscheme::S
     α₀::T
@@ -43,8 +43,8 @@ end
 
 
 ### Constructors
-function RosenfeldFMT(liquid::HardDisks{T}) where {T <: AbstractFloat}
-    η  = liquid.η
+function RosenfeldFMT(liquid::HardDisks)
+    η  = volume_fraction(liquid)
     η² = η * η
     η³ = η² * η
     η⁴ = η³ * η
@@ -55,16 +55,15 @@ function RosenfeldFMT(liquid::HardDisks{T}) where {T <: AbstractFloat}
     Z′ = ((0.256η + 0.081η² + 0.24η³) * η₋⁻²) + (2Z * η₋⁻¹)
     χ  = Z + η * Z′
 
-    G = sqrt( Z′ / 2 )
+    G = sqrt(Z′ / 2)
     A = (1 + (2η - 1) * χ + 2η * G) / η
     B = (-1 + (1 - η) * χ - 3η * G) / η
 
-    return RosenfeldFMT{T}(A, B, G)
+    return RosenfeldFMT{typeof(A)}(A, B, G)
 end
 
-function PercusYevick(liquid::HardSpheres{T}) where {T <: AbstractFloat}
-    η = liquid.η
-
+function PercusYevick(liquid::HardSpheres)
+    η = volume_fraction(liquid)
     η₀⁴ = @fastmath (1 - η)^4
     η₁² = (1 + 2η)^2
     η₂² = (2 +  η)^2
@@ -73,11 +72,11 @@ function PercusYevick(liquid::HardSpheres{T}) where {T <: AbstractFloat}
     β = 3η * η₂² / 2η₀⁴
     δ = -η * η₁² / 2η₀⁴
 
-    return PercusYevick{T}(α, β, δ)
+    return PercusYevick{typeof(α)}(α, β, δ)
 end
 
-function VerletWeis(liquid::HardSpheres{T}) where {T <: AbstractFloat}
-    η  = liquid.η
+function VerletWeis(liquid::HardSpheres)
+    η  = volume_fraction(liquid)
     κ  = 1 - η / 16
     η′ = η * κ
     α  = ∛(κ)
@@ -85,30 +84,31 @@ function VerletWeis(liquid::HardSpheres{T}) where {T <: AbstractFloat}
     coreliquid = HardSpheres(η′)
     subscheme = PercusYevick(coreliquid)
 
-    return VerletWeis{T}(coreliquid, subscheme, α)
+    return VerletWeis{typeof(α)}(coreliquid, subscheme, α)
 end
 
-function SharmaSharma{SS}(liquid::AttractiveHardSpheres{U, T}) where
-    {SS <: ApproximationScheme, U, T <: AbstractFloat}
+function SharmaSharma{S}(liquid::AttractiveHardSpheres{TT}) where
+    {S<:ApproximationScheme, TT}
 
-    η = liquid.η
+    η = volume_fraction(liquid)
     coreliquid = HardSpheres(η)
-    subscheme = SS(coreliquid)
-    S = typeof(subscheme)
+    subscheme = S(coreliquid)
+    SS = typeof(subscheme)
 
-    return SharmaSharma{S, T}(coreliquid, subscheme)
+    return SharmaSharma{SS, TT}(coreliquid, subscheme)
 end
 
-function MSA{SS}(liquid::DipolarHardSpheres{T}; tol = √(eps(T))) where
-    {SS <: ApproximationScheme, T <: AbstractFloat}
+function MSA{S}(liquid::DipolarHardSpheres{TT}; tol = √(eps(TT))) where
+    {S<:ApproximationScheme, TT}
 
-    η, T′ = liquid.η, liquid.T′
+    η = volume_fraction(liquid)
+    T = temperature(liquid)
     coreliquid = HardSpheres(η)
-    subscheme = SS(coreliquid)
-    S = typeof(subscheme)
+    subscheme = S(coreliquid)
+    SS = typeof(subscheme)
     κ = dhs_msa_parameter(liquid, tol)
 
-    T⁻¹ = 1 / T′
+    T⁻¹ = 1 / T
     ξ   = κ * η
 
     ξ₁² = (1 - 2ξ)^2
@@ -142,6 +142,6 @@ function MSA{SS}(liquid::DipolarHardSpheres{T}; tol = √(eps(T))) where
     b₁ = 2 * (α₁′ - 4β₁′) / 3
     b₃ = 8 * (α₃′ - 2β₃′)
 
-    return MSA{S, T}(coreliquid, subscheme,
-                     α₀, α₁, α₂, α₃, β₀, β₁, β₂, β₃, a₁, a₃, b₁, b₃)
+    return MSA{SS, TT}(coreliquid, subscheme,
+                       α₀, α₁, α₂, α₃, β₀, β₁, β₂, β₃, a₁, a₃, b₁, b₃)
 end
