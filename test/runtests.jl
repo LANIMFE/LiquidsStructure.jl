@@ -231,7 +231,7 @@ end
 @testset "Yukawa Attractive hard spheres, Sharma–Sharma" begin
     Z  = 2.0
     λ  = 1.5
-    U  = Yukawa(Z)
+    U  = Yukawa{3}(Z)
 
     η  = 0.1
     T′ = 1.0
@@ -317,7 +317,7 @@ end
 
 @testset "Square Well Attractive hard spheres, Sharma–Sharma" begin
     λ  = 1.5
-    U  = SquareWell(λ)
+    U  = SquareWell{3}(λ)
 
     η  = 0.1
     T′ = 1.0
@@ -408,7 +408,7 @@ end
 
     T′ = 1.0
     Z  = 2.0
-    U  = Yukawa(Z, ϵ = 0.0)
+    U  = Yukawa{3}(Z, ϵ = 0.0)
     f  = StructureFactor(AHS(η, T′, U), SharmaSharma{VerletWeis})
     @test f(0.0) ≈ f₀(0.0)
     @test f(π/2) ≈ f₀(π/2)
@@ -586,24 +586,25 @@ end
 @testset "Utils" begin
     S = StructureFactor(HardDisks(0.1), RosenfeldFMT)
     @test dimensionality(S) == dimensionality(S.liquid) == 2
-    @test string(S.liquid) == "HardDisks(η=0.1)"
+    @test string(S.liquid) == "HardDisks(0.1, 1.0, HardCore{2}(1))"
     @test string(S.scheme) == "RosenfeldFMT"
-    @test string(S) == "HardDisks(η=0.1),RosenfeldFMT"
+    @test string(S) == "HardDisks(0.1, 1.0, HardCore{2}(1)), RosenfeldFMT"
 
     S = StructureFactor(HardSpheres(0.2), PercusYevick)
     @test dimensionality(S) == dimensionality(S.liquid) == 3
-    @test string(S.liquid) == "HardSpheres(η=0.2)"
+    @test string(S.liquid) == "HardSpheres(0.2, 1.0, HardCore{3}(1))"
     @test string(S.scheme) == "PercusYevick"
-    @test string(S) == "HardSpheres(η=0.2),PercusYevick"
+    @test string(S) == "HardSpheres(0.2, 1.0, HardCore{3}(1)), PercusYevick"
 
     S = StructureFactor(HardSpheres(0.3), VerletWeis)
-    @test string(S.liquid) == "HardSpheres(η=0.3)"
+    @test string(S.liquid) == "HardSpheres(0.3, 1.0, HardCore{3}(1))"
     @test string(S.scheme) == "VerletWeis"
-    @test string(S) == "HardSpheres(η=0.3),VerletWeis"
+    @test string(S) == "HardSpheres(0.3, 1.0, HardCore{3}(1)), VerletWeis"
 
     S = StructureFactor(DipolarHardSpheres(0.4, 1.0), MSA{PercusYevick})
     @test dimensionality(S) == dimensionality(S.liquid) == 3
-    @test string(S.liquid) == "DipolarHardSpheres(η=0.4,T′=1.0)"
+    potential = "CompositePotential(HardCore{3}(1), DipoleDipole(1))"
+    @test string(S.liquid) == "DipolarHardSpheres(0.4, 1.0, $potential)"
     @test string(S.scheme) == "MSA{PercusYevick}"
-    @test string(S) == "DipolarHardSpheres(η=0.4,T′=1.0),MSA{PercusYevick}"
+    @test string(S) == "DipolarHardSpheres(0.4, 1.0, $potential), MSA{PercusYevick}"
 end

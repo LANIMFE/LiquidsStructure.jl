@@ -1,27 +1,62 @@
-abstract type Liquid{N} end
-
-struct HardDisks{T} <: Liquid{2}
-    η::T
-end
-
-struct HardSpheres{T} <: Liquid{3}
-    η::T
-end
-
-struct AttractiveHardSpheres{U, T} <: Liquid{3}
-    η ::T
-    T′::T
+struct LiquidProperties{P, U}
+    η::P # volume fraction
+    T::P # reduced temperature
     potential::U
+end
 
-    function AttractiveHardSpheres(η, T, potential::U) where {U}
-        θ = T / potential.ϵ
-        η′, T′ = promote(η, θ)
+LiquidProperties(η::P, potential::U) where {P, U<:Potential} =
+    LiquidProperties{P, U}(η, one(P), potential)
 
-        return new{U, typeof(η′)}(η′, T′, potential)
+potential(p::LiquidProperties) = p.potential
+temperature(p::LiquidProperties) = p.T
+volume_fraction(p::LiquidProperties) = p.η
+
+
+### Liquids types
+abstract type AbstractLiquid{U} end
+
+const LIQUIDS = (:AttractiveHardSpheres, :DipolarHardSpheres, :HardDisks,
+                 :HardSpheres)
+
+for liquid in LIQUIDS
+    @eval begin
+        struct $liquid{P, U} <: AbstractLiquid{U}
+            properties::LiquidProperties{P, U}
+        end
     end
 end
 
-struct DipolarHardSpheres{T} <: Liquid{3}
-    η ::T
-    T′::T
+
+### Liquids constructors
+function HardDisks(η::Real)
+    properties = LiquidProperties(η, HardCore{2}())
+    return HardDisks(properties)
 end
+
+function HardSpheres(η::Real)
+    properties = LiquidProperties(η, HardCore{3}())
+    return HardSpheres(properties)
+end
+
+function AttractiveHardSpheres(η::Real, T::Real, potential::CompositePotential)
+    η′, T′ = promote(η, T)
+    properties = LiquidProperties(η′, T′, potential)
+    return AttractiveHardSpheres(properties)
+end
+#
+function AttractiveHardSpheres(η::Real, T::Real, potential::AttractivePotential)
+    T′ = T / energy_scale(potential)
+    potential′ = CompositePotential(HardCore{3}(), potential)
+    return AttractiveHardSpheres(η, T′, potential′)
+end
+
+function DipolarHardSpheres(η::Real, T::Real)
+    η′, T′ = promote(η, T)
+    potential = CompositePotential(HardCore{3}(), DipoleDipole())
+    properties = LiquidProperties(η′, T′, potential)
+    return DipolarHardSpheres(properties)
+end
+
+potential(l::AbstractLiquid) = potential(l.properties)
+temperature(l::AbstractLiquid) = temperature(l.properties)
+volume_fraction(l::AbstractLiquid) = volume_fraction(l.properties)
