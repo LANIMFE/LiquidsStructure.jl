@@ -24,6 +24,11 @@ struct SharmaSharma{S, T} <: ApproximationScheme
     subscheme::S
 end
 
+struct NonLinearSharmaSharma{S, T} <: ApproximationScheme
+    coreliquid::HardSpheres{T}
+    subscheme::S
+end
+
 struct MSA{S, T} <: ApproximationScheme
     coreliquid::HardSpheres{T}
     subscheme::S
@@ -96,6 +101,17 @@ function SharmaSharma{S}(liquid::AttractiveHardSpheres{TT}) where
     SS = typeof(subscheme)
 
     return SharmaSharma{SS, TT}(coreliquid, subscheme)
+end
+
+function NonLinearSharmaSharma{S}(liquid::AttractiveHardSpheres{TT}) where
+    {S <: ApproximationScheme, TT}
+
+    η = volume_fraction(liquid)
+    coreliquid = HardSpheres(η)
+    subscheme = S(coreliquid)
+    SS = typeof(subscheme)
+
+    return NonLinearSharmaSharma{SS, TT}(coreliquid, subscheme)
 end
 
 function MSA{S}(liquid::DipolarHardSpheres{TT}; tol = √(eps(TT))) where
