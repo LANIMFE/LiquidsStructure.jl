@@ -59,14 +59,18 @@ end
 #
 SquareWell{N}(λ; ϵ = 1) where {N} = SquareWell{N}(λ, ϵ)
 
-energy_scale(potential::AttractivePotential) = potential.ϵ
-length_scale(potential::HardCore) = potential.σ
-length_scale(potential::SquareWell) = potential.λ
-length_scale(potential::Yukawa) = potential.z
-length_scale(potential::CompositePotential) =
-    (length_scale(potential.u₁), length_scale(potential.u₂))
-
 # Aliases for composite potentials
 const DHSPotential = CompositePotential{3, <:HardCore, <:DipoleDipole}
 const YHSPotential = CompositePotential{3, <:HardCore, <:Yukawa}
 const SWHSPotential = CompositePotential{3, <:HardCore, <:SquareWell}
+
+energy_scale(potential::Potential) = 1
+energy_scale(potential::AttractivePotential) = potential.ϵ
+
+length_scale(potential::Potential) = 1
+length_scale(potential::HardCore) = potential.σ
+length_scale(potential::SquareWell) = potential.λ
+length_scale(potential::Yukawa) = potential.z
+length_scale(potential::DHSPotential) = length_scale(potential.u₁)
+length_scale(potential::CompositePotential) =
+    (length_scale(potential.u₁), length_scale(potential.u₂))
