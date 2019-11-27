@@ -22,7 +22,7 @@ struct HardCore{T, N} <: RepulsivePotential{N}
     σ::T
 end
 #
-HardCore{N}(σ::T) where {T, N} = HardCore{T, N}(σ)
+HardCore{N}(σ::T) where {T, N} = (@assert σ > 0; HardCore{T, N}(σ))
 HardCore{N}() where {N} = HardCore{N}(1)
 
 struct DipoleDipole{T} <: Potential{3}
@@ -33,43 +33,44 @@ DipoleDipole() = DipoleDipole(1)
 
 struct Yukawa{T, N} <: AttractivePotential{N}
     z::T
-    σ::T
     ϵ::T
 end
 #
-function Yukawa{N}(z, σ, ϵ) where {N}
+function Yukawa{N}(z, ϵ) where {N}
     @assert z > 0
-    @assert σ > 0
+    z′, ϵ′ = promote(z, ϵ)
 
-    z′, σ′, ϵ′ = promote(z, σ, ϵ)
-
-    return Yukawa{typeof(z′), N}(z′, σ′, ϵ′)
+    return Yukawa{typeof(z′), N}(z′, ϵ′)
 end
 #
-Yukawa{N}(z; σ = 1, ϵ = 1) where {N} = Yukawa{N}(z, σ, ϵ)
+Yukawa{N}(z; ϵ = 1) where {N} = Yukawa{N}(z, ϵ)
 
 struct SquareWell{T, N} <: AttractivePotential{N}
     λ::T
-    σ::T
     ϵ::T
 end
 #
-function SquareWell{N}(λ, σ, ϵ) where {N}
+function SquareWell{N}(λ, ϵ) where {N}
     @assert λ > 1
-    @assert σ > 0
+    λ′, ϵ′ = promote(λ, ϵ)
 
-    λ′, σ′, ϵ′ = promote(λ, σ, ϵ)
-
-    return SquareWell{typeof(λ′), N}(λ′, σ′, ϵ′)
+    return SquareWell{typeof(λ′), N}(λ′, ϵ′)
 end
 #
-SquareWell{N}(λ; σ = 1, ϵ = 1) where {N} = SquareWell{N}(λ, σ, ϵ)
-
-energy_scale(potential::AttractivePotential) = potential.ϵ
-length_scale(potential::CompositePotential) = length_scale(potential.u₁)
-length_scale(potential::Union{AttractivePotential, HardCore}) = potential.σ
+SquareWell{N}(λ; ϵ = 1) where {N} = SquareWell{N}(λ, ϵ)
 
 # Aliases for composite potentials
 const DHSPotential = CompositePotential{3, <:HardCore, <:DipoleDipole}
 const YHSPotential = CompositePotential{3, <:HardCore, <:Yukawa}
 const SWHSPotential = CompositePotential{3, <:HardCore, <:SquareWell}
+
+energy_scale(potential::Potential) = 1
+energy_scale(potential::AttractivePotential) = potential.ϵ
+
+length_scale(potential::Potential) = 1
+length_scale(potential::HardCore) = potential.σ
+length_scale(potential::SquareWell) = potential.λ
+length_scale(potential::Yukawa) = potential.z
+length_scale(potential::DHSPotential) = length_scale(potential.u₁)
+length_scale(potential::CompositePotential) =
+    (length_scale(potential.u₁), length_scale(potential.u₂))

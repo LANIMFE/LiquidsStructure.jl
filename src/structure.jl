@@ -123,11 +123,7 @@ function Ĉ(liquid::AttractiveHardSpheres{P, U}, scheme::SharmaSharma, k′) wh
 
     η = volume_fraction(liquid)
     T = temperature(liquid)
-    u = potential(liquid)
-    σ = length_scale(u)
-
-    z  = u.u₂.z
-    z² = z * z
+    σ, z = length_scale(potential(liquid))
 
     k  = σ * k′
     k² = k * k
@@ -138,7 +134,7 @@ function Ĉ(liquid::AttractiveHardSpheres{P, U}, scheme::SharmaSharma, k′) wh
 
     C = smallk ? ((1 + z) - (3 + z) / 6 * k² + (5 + z) / 120 * k⁴) :
                   (k * cosk + z * sink) / k
-    C = C / (k² + z²)
+    C = C / (k² + z * z)
 
     C₀ = Ĉ(scheme.coreliquid, scheme.subscheme, k′)
 
@@ -166,10 +162,8 @@ function Ĉ(liquid::AttractiveHardSpheres{P, U}, scheme::SharmaSharma, k′) wh
 
     η = volume_fraction(liquid)
     T = temperature(liquid)
-    u = potential(liquid)
-    σ = length_scale(u)
+    σ, λ = length_scale(potential(liquid))
 
-    λ  = u.u₂.λ
     λ³ = λ * λ * λ
     λ⁵ = λ³ * λ * λ
 
