@@ -586,25 +586,25 @@ end
 @testset "Utils" begin
     S = StructureFactor(HardDisks(0.1), RosenfeldFMT)
     @test dimensionality(S) == dimensionality(S.liquid) == 2
-    @test string(S.liquid) == "HardDisks(0.1, 1.0, HardCore{2}(1))"
-    @test string(S.scheme) == "RosenfeldFMT"
-    @test string(S) == "HardDisks(0.1, 1.0, HardCore{2}(1)), RosenfeldFMT"
+    @test repr(S.liquid) == "HardDisks(0.1, 1.0, HardCore{2}(1))"
+    @test repr(S.scheme) == "RosenfeldFMT"
+    @test repr(S) == "StructureFactor(HardDisks(0.1, 1.0, HardCore{2}(1)), RosenfeldFMT)"
 
     S = StructureFactor(HardSpheres(0.2), PercusYevick)
     @test dimensionality(S) == dimensionality(S.liquid) == 3
-    @test string(S.liquid) == "HardSpheres(0.2, 1.0, HardCore{3}(1))"
-    @test string(S.scheme) == "PercusYevick"
-    @test string(S) == "HardSpheres(0.2, 1.0, HardCore{3}(1)), PercusYevick"
+    @test repr(S.liquid) == "HardSpheres(0.2, 1.0, HardCore{3}(1))"
+    @test repr(S.scheme) == "PercusYevick"
+    @test repr(S) == "StructureFactor(HardSpheres(0.2, 1.0, HardCore{3}(1)), PercusYevick)"
 
     S = StructureFactor(HardSpheres(0.3), VerletWeis)
-    @test string(S.liquid) == "HardSpheres(0.3, 1.0, HardCore{3}(1))"
-    @test string(S.scheme) == "VerletWeis"
-    @test string(S) == "HardSpheres(0.3, 1.0, HardCore{3}(1)), VerletWeis"
+    @test repr(S.liquid) == "HardSpheres(0.3, 1.0, HardCore{3}(1))"
+    @test repr(S.scheme) == "VerletWeis"
+    @test repr(S) == "StructureFactor(HardSpheres(0.3, 1.0, HardCore{3}(1)), VerletWeis)"
 
     S = StructureFactor(DipolarHardSpheres(0.4, 1.0), MSA{PercusYevick})
     @test dimensionality(S) == dimensionality(S.liquid) == 3
     potential = "CompositePotential(HardCore{3}(1), DipoleDipole(1))"
-    @test string(S.liquid) == "DipolarHardSpheres(0.4, 1.0, $potential)"
-    @test string(S.scheme) == "MSA{PercusYevick}"
-    @test string(S) == "DipolarHardSpheres(0.4, 1.0, $potential), MSA{PercusYevick}"
+    @test repr(S.liquid) == "DipolarHardSpheres(0.4, 1.0, $potential)"
+    @test repr(S.scheme) == "MSA{PercusYevick}"
+    @test repr(S) == "StructureFactor(DipolarHardSpheres(0.4, 1.0, $potential), MSA{PercusYevick})"
 end
