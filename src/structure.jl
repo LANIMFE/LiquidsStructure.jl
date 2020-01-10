@@ -184,7 +184,7 @@ function Ĉ(liquid::AttractiveHardSpheres{P, U}, scheme::SharmaSharma, k′) wh
 end
 
 """
-    Ĉ(::AttractiveHardSpheres{<:SquareWell}, ::NonLinearSharmaSharma, k)
+    Ĉ(::AttractiveHardSpheres{<:SWHSPotential}, ::NonLinearSharmaSharma, k)
 
 Returns the product of the bulk density and the Fourier transform (FT) of the
 direct correlation function for an attractive square-well hard-spheres liquid
@@ -198,19 +198,20 @@ direct correlation function for the hard spheres core and
 
 `k` is the wavenumber.
 """
-function Ĉ(liquid::AttractiveHardSpheres{U}, scheme::NonLinearSharmaSharma, k′) where
-    {U <: SquareWell}
+function Ĉ(liquid::AttractiveHardSpheres{P, U}, scheme::NonLinearSharmaSharma, k′) where
+    {P, U<:SWHSPotential}
 
-    η  = liquid.η
-    T′ = liquid.T′
-    λ  = liquid.potential.λ
-    k  = liquid.potential.σ * k′
-    x  = exp(1/T′) - 1
+    η = volume_fraction(liquid)
+    T = temperature(liquid)
+    σ, λ = length_scale(potential(liquid))
+    x = exp(1 / T) - 1
 
-    k² = k * k
-    k³ = k² * k
     λ³ = λ * λ * λ
     λ⁵ = λ³ * λ * λ
+
+    k = σ * k′
+    k² = k * k
+    k³ = k² * k
     sink, cosk = sin(k), cos(k)
     sinλk, cosλk = sin(λ * k), cos(λ * k)
 
