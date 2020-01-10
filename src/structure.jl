@@ -184,6 +184,47 @@ function Ĉ(liquid::AttractiveHardSpheres{P, U}, scheme::SharmaSharma, k′) wh
 end
 
 """
+    Ĉ(::AttractiveHardSpheres{<:SquareWell}, ::NonLinearSharmaSharma, k)
+
+Returns the product of the bulk density and the Fourier transform (FT) of the
+direct correlation function for an attractive square-well hard-spheres liquid
+using the Non-Linear Sharma and Sharma approximation, that is, the sum of the FT of the
+direct correlation function for the hard spheres core and
+``exp[\\beta\\cdot\\u(r)]-1``, where ``u(r)`` is the potential:
+
+```math
+    u(r) = -\\epsilon\\sigma, \\qquad \\sigma < r \\le \\lambda\\sigma
+```
+
+`k` is the wavenumber.
+"""
+function Ĉ(liquid::AttractiveHardSpheres{U}, scheme::NonLinearSharmaSharma, k′) where
+    {U <: SquareWell}
+
+    η  = liquid.η
+    T′ = liquid.T′
+    λ  = liquid.potential.λ
+    k  = liquid.potential.σ * k′
+    x  = exp(1/T′) - 1
+
+    k² = k * k
+    k³ = k² * k
+    λ³ = λ * λ * λ
+    λ⁵ = λ³ * λ * λ
+    sink, cosk = sin(k), cos(k)
+    sinλk, cosλk = sin(λ * k), cos(λ * k)
+
+    smallk = k < 0.075
+
+    C = smallk ? (λ³ - 1) / 3 - (λ⁵ - 1) / 30 * k² :
+                 (cosk - λ * cosλk) / k² + (sinλk - sink) / k³
+
+    C₀ = Ĉ(scheme.coreliquid, scheme.subscheme, k′)
+
+    return C₀ + 24η * x * C
+end
+
+"""
     Ĉ(liquid::DipolarHardSpheres, scheme::MSA, k)
 
 Returns the product of the bulk density and the Fourier transform of
