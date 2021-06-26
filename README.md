@@ -29,9 +29,9 @@ factor of:
 
 ## Installation
 
-`LiquidsStructure.jl` should work on Julia 1.0 and later versions. It requires adding the
-[LANIMFE-Registy](https://github.com/LANIMFE/LANIMFE-Registry). From Julia 1.1 and onwards
-it can be installed by running
+`LiquidsStructure.jl` should work on Julia 1.0 and later versions. It requires first
+adding the [LANIMFE-Registy](https://github.com/LANIMFE/LANIMFE-Registry). From Julia 1.1
+and onwards it can be installed by running
 
 ```julia
 julia> ]
