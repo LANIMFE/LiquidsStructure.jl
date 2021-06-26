@@ -15,10 +15,14 @@ volume_fraction(p::LiquidProperties) = p.η
 ### Liquids types
 abstract type AbstractLiquid{U} end
 
-const LIQUIDS = (:AttractiveHardSpheres, :DipolarHardSpheres, :HardDisks,
-                 :HardSpheres)
+const LIQUIDS_NAMES = (
+    :AttractiveHardSpheres,
+    :DipolarHardSpheres,
+    :HardDisks,
+    :HardSpheres
+)
 
-for liquid in LIQUIDS
+for liquid in LIQUIDS_NAMES
     @eval begin
         struct $liquid{P, U} <: AbstractLiquid{U}
             properties::LiquidProperties{P, U}
